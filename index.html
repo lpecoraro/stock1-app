@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Price Checker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@latest"></script>
+    <script src="app.js" defer></script>
+    <style>
+        #chart-container {
+            height: 500px;
+        }
+    </style>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        input, button { padding: 8px; margin: 5px 0; }
+        .error { color: red; }
+        #chart-container {
+            margin-top: 20px;
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Price Checker</h1>
+    <input type="text" id="symbol" placeholder="Enter stock symbol (e.g. AAPL)">
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+    <button id="getDataBtn">Get Data</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('getDataBtn').addEventListener('click', getStockData);
+        });
+    </script>
+    <div id="price-data"></div>
+    <div id="chart-container" style="height: 400px; width: 100%; margin-top: 20px;">
+        <canvas id="candlestick-chart"></canvas>
+    </div>
+    <div id="price-table"></div>
+    <p id="error" class="error"></p>
+    <div id="troubleshooting" class="troubleshooting"></div>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+=======
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        input, button { padding: 8px; margin: 5px 0; }
+        .error { color: red; }
+        .troubleshooting { margin-top: 20px; font-size: 0.9em; color: #666; }
+    </style>
+</body>
+</html>
