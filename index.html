@@ -1,60 +1,239 @@
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        input, button { padding: 8px; margin: 5px 0; }
+        .error { color: red; }
+        .troubleshooting { margin-top: 20px; font-size: 0.9em; color: #666; }
+    </style>
+</body>
+</html>
+=======
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Stock Price Checker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@latest"></script>
+    <title>Stock Chart App</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="app.js" defer></script>
     <style>
-        #chart-container {
-            height: 500px;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
         }
-    </style>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        input, button { padding: 8px; margin: 5px 0; }
-        .error { color: red; }
-        #chart-container {
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #26a69a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1e887e;
+        }
+        #chart {
+            height: 1000px;
             margin-top: 20px;
-            height: 400px;
-            width: 100%;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #error {
+            color: #ef5350;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Stock Price Checker</h1>
-    <input type="text" id="symbol" placeholder="Enter stock symbol (e.g. AAPL)">
-    <input type="date" id="startDate">
-    <input type="date" id="endDate">
-    <button id="getDataBtn">Get Data</button>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('getDataBtn').addEventListener('click', getStockData);
-        });
-    </script>
-    <div id="price-data"></div>
-    <div id="chart-container" style="height: 400px; width: 100%; margin-top: 20px;">
-        <canvas id="candlestick-chart"></canvas>
+    <div class="desktop-layout">
+        <header class="header-bar">
+            <h1 class="header-title">Stock Price Viewer</h1>
+            <div class="stock-info">
+                <h2 id="stockTitle">MSFT <span>3 Months View</span></h2>
+                <div class="search-controls">
+                    <input type="text" id="symbol" value="MSFT" placeholder="Stock symbol">
+                    <select id="timeHorizon">
+                        <option value="30">1 Month</option>
+                        <option value="90" selected>3 Months</option>
+                        <option value="180">6 Months</option>
+                        <option value="365">1 Year</option>
+                    </select>
+                    <button id="getChart">Get Data</button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="chart-section">
+                <div id="chart"></div>
+            </div>
+            <div class="data-section">
+                <h2>Price History</h2>
+                <div id="price-table-container">
+                    <table id="price-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>High</th>
+                                <th>Low</th>
+                                <th>Close</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loading">Loading data...</div>
+        <div id="error"></div>
     </div>
-    <div id="price-table"></div>
-    <p id="error" class="error"></p>
-    <div id="troubleshooting" class="troubleshooting"></div>
+    
     <style>
-        table {
-            border-collapse: collapse;
+        .desktop-layout {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 20px);
+            width: calc(100vw - 20px);
+            background: #f5f5f5;
+            margin: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header-bar {
+            background: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .stock-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
-            margin-top: 10px;
         }
-        th, td {
+        
+        .stock-info h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: normal;
+            opacity: 0.9;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stock-info h2 span {
+            font-weight: normal;
+            opacity: 0.8;
+        }
+        
+        .search-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .search-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .search-controls select {
+            padding: 5px;
+            border-radius: 4px;
             border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
         }
-        th {
-            background-color: #f2f2f2;
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .chart-section {
+            flex: 2;
+            padding: 20px;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .data-section {
+            flex: 1;
+            padding: 15px;
+            background: #ecf0f1;
+            overflow: auto;
+        }
+        
+        #price-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        #price-table th, #price-table td {
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        #price-table th:nth-child(1), 
+        #price-table td:nth-child(1) {
+            width: 30%;
+        }
+        
+        #price-table th:nth-child(2), 
+        #price-table th:nth-child(3),
+        #price-table th:nth-child(4),
+        #price-table td:nth-child(2),
+        #price-table td:nth-child(3),
+        #price-table td:nth-child(4) {
+            width: 23.3%;
+        }
+        
+        #price-table th {
+            background-color: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
         }
     </style>
+</body>
+</html>
 =======
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
