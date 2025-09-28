@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let chart;
-    const API_KEY = 'YOUR_YAHOO_FINANCE_API_KEY'; // Your existing key
+    const API_KEY = 'YOUR_YAHOO_FINANCE_API_KEY'; // Replace with your actual key
     
     document.getElementById('getChart').addEventListener('click', loadChartData);
     
@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const days = document.getElementById('timeHorizon').value;
         if (!symbol) return;
 
-        showLoading(true);
-        hideError();
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error').style.display = 'none';
 
         try {
             const period1 = Math.floor((Date.now() - (days * 24 * 60 * 60 * 1000)) / 1000);
@@ -31,10 +31,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             renderCandlestickChart(transformData(result));
         } catch (error) {
-            showError(error.message);
+            document.getElementById('error').textContent = error.message;
+            document.getElementById('error').style.display = 'block';
             console.error('Error:', error);
         } finally {
-            showLoading(false);
+            document.getElementById('loading').style.display = 'none';
         }
     }
 
@@ -53,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderCandlestickChart(stockData) {
-        // Update stock info title
         const timeHorizonText = {
             '30': '1 Month',
             '90': '3 Months',
@@ -61,12 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
             '365': '1 Year'
         };
         const days = document.getElementById('timeHorizon').value;
-        document.getElementById('stockTitle').innerHTML = `
-            ${stockData.symbol} 
-            <span>${timeHorizonText[days]} View</span>
-        `;
+        document.querySelector('h1').textContent = 
+            `Stock Price Viewer - ${stockData.symbol} (${timeHorizonText[days]})`;
         
-        // Update price table
         updatePriceTable(stockData.prices);
         
         const seriesData = stockData.prices.map(price => ({
@@ -96,29 +93,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             xaxis: {
-                type: 'datetime',
-                labels: {
-                    datetimeUTC: false,
-                    formatter: function(value) {
-                        return new Date(value).toLocaleDateString();
-                    }
-                }
+                type: 'datetime'
             },
             yaxis: {
                 labels: {
                     formatter: function(value) {
                         return '$' + value.toFixed(2);
                     }
-                },
-                tooltip: {
-                    enabled: true,
-                    formatter: function(value) {
-                        return '$' + value.toFixed(2);
-                    }
                 }
-            },
-            grid: {
-                borderColor: '#f1f1f1'
             }
         };
 
@@ -144,19 +126,5 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             tableBody.appendChild(row);
         });
-    }
-
-    function showLoading(show) {
-        document.getElementById('loading').style.display = show ? 'block' : 'none';
-    }
-
-    function showError(message) {
-        const errorElement = document.getElementById('error');
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-    }
-
-    function hideError() {
-        document.getElementById('error').style.display = 'none';
     }
 });
